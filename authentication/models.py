@@ -20,6 +20,7 @@ class AccountProfile(models.Model):
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=2)
     zip_code = models.CharField(max_length=10)
+    account_number=models.CharField(max_length=12,default="0089673556672")
     
     # Account Information
     ACCOUNT_TYPES = [
@@ -50,7 +51,8 @@ class MoneyTransfer(models.Model):
         ('APPROVED', 'APPROVED'),
     ]
     status_type = models.CharField(max_length=20, choices=STATUS_TYPES,default="PENDING")
-    
+    date=models.DateTimeField(null=True)
+
     def __str__(self):
         return f"Transfer from {self.user.username} to {self.recipient_name} for {self.amount}"
     
