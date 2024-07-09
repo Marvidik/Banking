@@ -36,13 +36,13 @@ class AccountProfileSerializer(serializers.ModelSerializer):
         fields = [
             'first_name', 'last_name', 'date_of_birth', 'ssn', 'email',
             'phone_number', 'street_address', 'city', 'state', 'zip_code',
-            'account_type', 'balance'
+            'account_type', 'balance','account_number'
         ]
 
 class MoneyTransferSerializer(serializers.ModelSerializer):
     class Meta:
         model = MoneyTransfer
-        fields = ['user', 'recipient_name', 'recipient_account_number', 'recipient_routing_number', 'recipient_bank_name', 'amount','status_type']
+        fields = ['user', 'recipient_name', 'recipient_account_number', 'recipient_routing_number', 'recipient_bank_name', 'amount','status_type','date']
 
 
 
