@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils import timezone
+
 
 
 
@@ -51,7 +53,7 @@ class MoneyTransfer(models.Model):
         ('APPROVED', 'APPROVED'),
     ]
     status_type = models.CharField(max_length=20, choices=STATUS_TYPES,default="PENDING")
-    date=models.DateTimeField(null=True)
+    date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"Transfer from {self.user.username} to {self.recipient_name} for {self.amount}"
