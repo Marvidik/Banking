@@ -60,7 +60,6 @@ def register(request):
     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
 def get_profile(request,id):
     profile = AccountProfile.objects.filter(user=id)
     serializer = AccountProfileSerializer(profile, many=True)
@@ -70,7 +69,6 @@ def get_profile(request,id):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
 def get_transactions(request,id):
     transfers = MoneyTransfer.objects.filter(user=id)
     serializer = MoneyTransferSerializer(transfers, many=True)
@@ -78,7 +76,6 @@ def get_transactions(request,id):
     return Response({'Transactions': serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
 def make_transaction(request):
     # Check if the user is banned
     try:
