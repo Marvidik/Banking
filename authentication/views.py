@@ -76,10 +76,10 @@ def get_transactions(request,id):
     return Response({'Transactions': serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
-def make_transaction(request):
+def make_transaction(request,id):
     # Check if the user is banned
     try:
-        ban_status = BanUser.objects.get(user=request.user)
+        ban_status = BanUser.objects.get(user=id)
         if ban_status.ban:
             return Response({'error': 'You are banned from making transactions'}, status=status.HTTP_403_FORBIDDEN)
     except BanUser.DoesNotExist:

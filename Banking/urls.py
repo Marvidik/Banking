@@ -23,7 +23,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("login/",views.login,name="login"),
     path("transactions/<id>/",views.get_transactions, name="transaction"),
-    path("make-transactions/",views.make_transaction, name="maketransaction"),
+    path("make-transactions/<id>",views.make_transaction, name="maketransaction"),
     path("confirm-pin/",views.confirm_pin,name="Confirm-Pin"),
     path("profile/<id>",views.get_profile,name="getprofile"),
 ]
