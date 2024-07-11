@@ -36,7 +36,7 @@ class AccountProfileSerializer(serializers.ModelSerializer):
         fields = [
             'first_name', 'last_name', 'date_of_birth', 'ssn', 'email',
             'phone_number', 'street_address', 'city', 'state', 'zip_code',
-            'account_type', 'balance','account_number'
+            'account_type', 'balance','account_number','pending_balance'
         ]
 
 class MoneyTransferSerializer(serializers.ModelSerializer):
