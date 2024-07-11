@@ -55,6 +55,12 @@ class MoneyTransfer(models.Model):
     ]
     status_type = models.CharField(max_length=20, choices=STATUS_TYPES,default="PENDING")
     date = models.DateTimeField(default=timezone.now)
+    TRANS_TYPES = [
+        ('Received', 'Received'),
+        ('Transfer', 'Transfer'),
+        ('Atm', 'Atm'),
+    ]
+    transaction_type=models.CharField(max_length=20, choices=TRANS_TYPES,default="Transfer",null=True)
 
     def __str__(self):
         return f"Transfer from {self.user.username} to {self.recipient_name} for {self.amount}"
