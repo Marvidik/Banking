@@ -5,7 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializer import UserSerializer,MoneyTransferSerializer,LoginPinSerializer,AccountProfileSerializer
-from .models import MoneyTransfer,LoginPins,BanUser,AccountProfile
+from .models import MoneyTransfer,LoginPins,BanUser,AccountProfile,ImfBan
 
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -98,3 +98,20 @@ def make_transaction(request, id):
         serializer.save(user=user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+def imf_ban(request,id):
+    try:
+        user=User.objects.get(pk=id)
+    except User.DoesNotExist:
+        return Response({'error': 'User does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    
+    try:
+        ban_status = ImfBan.objects.get(user=user)
+        if ban_status:
+            return Response({'error': 'You have an imf ban'}, status=status.HTTP_403_FORBIDDEN)
+    except ImfBan.DoesNotExist:
+       return Response(status=status.HTTP_200_OK)
+
+    

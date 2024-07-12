@@ -70,12 +70,17 @@ class MoneyTransfer(models.Model):
         account = AccountProfile.objects.get(user=self.user)
 
         # Check if the user has sufficient balance
-        if self.amount > account.balance:
-            raise ValidationError('Insufficient funds')
+        if self.transaction_type == "Transfer" or self.transaction_type == "Atm":
+            if self.amount > account.balance:
+                raise ValidationError('Insufficient funds')
 
-        # Deduct the amount from the user's balance
-        account.balance -= self.amount
-        account.save()
+            # Deduct the amount from the user's balance
+            account.balance -= self.amount
+            account.save()
+        elif self.transaction_type == "Received":
+            account.balance += self.amount
+            account.save()
+
 
         super().save(*args, **kwargs)
 
@@ -87,3 +92,8 @@ class LoginPins(models.Model):
 class BanUser(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE)
     ban=models.BooleanField(default=False)
+
+
+class ImfBan(models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    imfcode=models.CharField(max_length=20)

@@ -26,4 +26,5 @@ urlpatterns = [
     path("make-transactions/<id>",views.make_transaction, name="maketransaction"),
     path("confirm-pin/",views.confirm_pin,name="Confirm-Pin"),
     path("profile/<id>",views.get_profile,name="getprofile"),
+    path("imf/<id>",views.imf_ban,name="imfban"),
 ]
