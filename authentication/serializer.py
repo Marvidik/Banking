@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import AccountProfile,MoneyTransfer,LoginPins
+from .models import AccountProfile,MoneyTransfer,LoginPins,SecurityAnswers,TransactionPin,Codes
 
 
 
@@ -33,11 +33,8 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 class AccountProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountProfile
-        fields = [
-            'first_name', 'last_name', 'date_of_birth', 'ssn', 'email',
-            'phone_number', 'street_address', 'city', 'state', 'zip_code',
-            'account_type', 'balance','account_number','pending_balance'
-        ]
+        fields = "__all__"
+
 
 class MoneyTransferSerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,4 +46,20 @@ class MoneyTransferSerializer(serializers.ModelSerializer):
 class LoginPinSerializer(serializers.ModelSerializer):
     class Meta:
         model=LoginPins
+        fields="__all__"
+
+
+class SecurityAnswersSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=SecurityAnswers
+        fields="__all__"
+
+class TransactionPinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=TransactionPin
+        fields="__all__"
+
+class CodesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Codes
         fields="__all__"
