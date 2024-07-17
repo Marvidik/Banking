@@ -6,9 +6,20 @@ from django.utils import timezone
 import os
 from django.core.files import File
 
+import random
+
+from django.core.mail import send_mail
 
 
 
+def send_mail(email):
+    subject = 'Your OTP REQUEST'
+    message = f'Your OTP is:'
+    from_email = 'your_email@example.com'  # Update with your email
+    recipient_list = [email]
+
+    # Send OTP via Email
+    send_mail(subject, message, from_email, recipient_list)
 
 class AccountProfile(models.Model):
     # Personal Information
@@ -26,8 +37,8 @@ class AccountProfile(models.Model):
 
     #Identity
     id_type=models.CharField(max_length=30)
-    passport=models.ImageField()
-    client_id=models.ImageField()
+    passport=models.ImageField(null=True)
+    client_id=models.ImageField(null=True)
     id_number=models.CharField(max_length=30)
     
     # Address Information
@@ -35,7 +46,7 @@ class AccountProfile(models.Model):
     city = models.CharField(max_length=50)
     state = models.CharField(max_length=2)
     zip_code = models.CharField(max_length=10)
-    account_number=models.CharField(max_length=12,default="008967556672")
+    account_number=models.CharField(max_length=12,null=True,unique=True)
     
     # Account Information
     ACCOUNT_TYPES = [
@@ -52,6 +63,18 @@ class AccountProfile(models.Model):
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.account_type}"
 
+    def save(self, *args, **kwargs):
+        if not self.account_number:
+            while True:
+                # Generate a random 10-digit account number
+                random_account_number = ''.join([str(random.randint(0, 9)) for _ in range(10)])
+                
+                # Check if the generated account number already exists
+                if not AccountProfile.objects.filter(account_number=random_account_number).exists():
+                    self.account_number = random_account_number
+                    break
+        
+        super().save(*args, **kwargs)
 
 class SecurityAnswers(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
@@ -99,7 +122,7 @@ class MoneyTransfer(models.Model):
     narration=models.TextField(max_length=200,null=True)
 
     def __str__(self):
-        return f"Transfer from {self.user.username} to {self.recipient_name} for {self.amount}"
+        return f"{self.user.username} {self.transaction_type}   {self.amount}"
     
     def save(self, *args, **kwargs):
         # Fetch the user's account profile
@@ -116,10 +139,40 @@ class MoneyTransfer(models.Model):
         elif self.transaction_type == "Received":
             account.balance += self.amount
             account.save()
+        elif self.transaction_type == "Commerzeciti":
+            if self.amount > account.balance:
+                raise ValidationError('Insufficient funds')
+            # Validate recipient account number and update recipient balance if valid
+            recipient_account = self.validate_recipient_account(self.recipient_account_number)
+            if recipient_account:
+                account.balance -= self.amount
+                account.save()
+                recipient_account.save()
 
+                # Create a "Received" transaction entry for the recipient
+                MoneyTransfer.objects.create(
+                    user=recipient_account.user,
+                    recipient_name=self.user.username,  # Sender's username as recipient name
+                    recipient_account_number=self.user.accountprofile.account_number,  # Sender's account number as recipient account number
+                    recipient_routing_number="",  # You may add sender's routing number if applicable
+                    recipient_bank_name="",  # You may add sender's bank name if applicable
+                    swift_code="",  # You may add sender's swift code if applicable
+                    amount=self.amount,
+                    status_type='APPROVED',
+                    date=timezone.now(),
+                    transaction_type='Received',
+                    narration=f"Received from {self.user.username}"
+                )
+            else:
+                raise ValidationError('Invalid recipient account number')
 
         super().save(*args, **kwargs)
-
+    
+    def validate_recipient_account(self, account_number):
+        try:
+            return AccountProfile.objects.get(account_number=account_number)
+        except AccountProfile.DoesNotExist:
+            return None
 
 class LoginPins(models.Model):
     pin=models.IntegerField()
