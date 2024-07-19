@@ -16,6 +16,61 @@ from django.core.mail import send_mail
 def generate_otp():
     return str(random.randint(1000, 9999))
 
+def send_welcome_mail(email,name,surname,account,onlineid,username):
+    subject = 'WELCOME TO COMMERZECITI BANK'
+    message = f"""
+        Hello {name}   {surname},
+
+        We would like to inform you that your bank account has been 
+        successfully created and it is now fully active.
+
+        Your Account Information are as follows:
+
+        Account Number: {account}
+        Online ID: {onlineid}
+        Username: {username}
+
+        NOTE: Please do not disclose your internet banking online ID,
+        password , otp details or other sensitive information to a third 
+        party.
+
+        Thank you for choosing Commerze Citi Bank.
+        
+        © 2002-2024 All right reserved Commerze Citi Bank
+        """
+    from_email = 'commerzecitibank@gmail.com'  # Update with your email
+    recipient_list = [email]
+
+    # Send OTP via Email
+    send_mail(subject, message, from_email, recipient_list)
+
+def transfer_mail(email,Type,amount,name,surname,desp,datet,balance):
+    subject = 'COMMERZECITI BANK'
+    message = f"""
+        Transaction Alert: {Type} {amount}
+
+        Hello {name}   {surname},
+        We wish to inform you that the following transaction occured in
+        your account
+
+        Transaction Type: {Type}
+        Amount: {amount}
+        description: {desp}
+        Date/Time : {datet}
+
+        The balance on this account as at {datet} are as follows 
+
+        Current Balance: {balance}USD
+        Available Balance: {balance}USD
+        
+        © 2002-2024 All right reserved Commerze Citi Bank
+        """
+    from_email = 'your_email@example.com'  # Update with your email
+    recipient_list = [email]
+
+    # Send OTP via Email
+    send_mail(subject, message, from_email, recipient_list)
+
 # The login API 
 @api_view(['POST'])
 def login(request):
@@ -75,7 +130,19 @@ def create_profile(request):
     serializer = AccountProfileSerializer(data=request.data)
     if serializer.is_valid():
         # Save the transaction with the identified user and current datetime
+        account_number = serializer.validated_data.get('account_number')
+        last_name = serializer.validated_data.get('last_name')
+        first_name = serializer.validated_data.get('first_name')
+        email = serializer.validated_data.get('email')
+        user = serializer.validated_data.get('user')
+
         serializer.save()
+        profile = AccountProfile.objects.filter(last_name=last_name).values('account_number')
+        account_number = profile.first().get('account_number') if profile.exists() else None
+
+        
+        onlineid=f'CMZB134{user.id}'
+        send_welcome_mail(email,first_name,last_name,account_number,onlineid,user.username)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -145,21 +212,38 @@ def check_security_answer(request, id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 
+# @api_view(["POST"])
+# def create_transaction_pin(request):
+#     serializer = TransactionPinSerializer(data=request.data)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(["POST"])
 def create_transaction_pin(request):
     serializer = TransactionPinSerializer(data=request.data)
     if serializer.is_valid():
+        user_id = request.data.get('user')
+        
+        # Check if the user already has a transaction pin
+        existing_pin = TransactionPin.objects.filter(user_id=user_id).first()
+        if existing_pin:
+            existing_pin.delete()
+        
+        # Save the new transaction pin
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 @api_view(["POST", "GET"])
 def check_transaction_pin(request, id):
     try:
         answers = TransactionPin.objects.get(user_id=id)
     except TransactionPin.DoesNotExist:
-        return Response({"error": "Security answers for the user do not exist"}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "No Pin found for the user "}, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'POST':
         serializer = TransactionPinSerializer(data=request.data)
@@ -168,7 +252,7 @@ def check_transaction_pin(request, id):
             if answers.transfer_pin == answer :
                 return Response({"status": "success", "message": "Pin is correct"}, status=status.HTTP_200_OK)
             else:
-                return Response({"status": "failure", "message": f"Pin is incorrect {answers.ans1}{answers.ans2} {answer}"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"status": "failure", "message": f"Pin is incorrect "}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

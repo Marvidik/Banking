@@ -12,14 +12,7 @@ from django.core.mail import send_mail
 
 
 
-def send_mail(email):
-    subject = 'Your OTP REQUEST'
-    message = f'Your OTP is:'
-    from_email = 'your_email@example.com'  # Update with your email
-    recipient_list = [email]
 
-    # Send OTP via Email
-    send_mail(subject, message, from_email, recipient_list)
 
 class AccountProfile(models.Model):
     # Personal Information
@@ -145,14 +138,15 @@ class MoneyTransfer(models.Model):
             account.save()
         elif self.transaction_type == "Commerzeciti":
             if self.amount > account.balance:
+                
                 raise ValidationError('Insufficient funds')
             # Validate recipient account number and update recipient balance if valid
+            
             recipient_account = self.validate_recipient_account(self.recipient_account_number)
             if recipient_account:
                 account.balance -= self.amount
                 account.save()
                 recipient_account.save()
-
                 # Create a "Received" transaction entry for the recipient
                 MoneyTransfer.objects.create(
                     user=recipient_account.user,
