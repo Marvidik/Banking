@@ -4,13 +4,17 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializer import UserSerializer,MoneyTransferSerializer,LoginPinSerializer,AccountProfileSerializer,SecurityAnswersSerializer,TransactionPinSerializer,CodesSerializer
-from .models import MoneyTransfer,LoginPins,BanUser,AccountProfile,SecurityAnswers,TransactionPin,Codes
+from .serializer import UserSerializer,MoneyTransferSerializer,LoginPinSerializer,AccountProfileSerializer,SecurityAnswersSerializer,TransactionPinSerializer,CodesSerializer,OTPSerializer,ConfirmOTPSerializer,ResetPasswordEmailSerializer,PasswordResetConfirmSerializer
+from .models import MoneyTransfer,LoginPins,BanUser,AccountProfile,SecurityAnswers,TransactionPin,Codes,OTP
 
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+import random
+from django.core.mail import send_mail
 
+def generate_otp():
+    return str(random.randint(1000, 9999))
 
 # The login API 
 @api_view(['POST'])
@@ -208,3 +212,104 @@ def check_bank_transfer_code(request):
         except Codes.DoesNotExist:
             return Response({"status": "failure", "message": "Bank Transfer code is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#Password reset API 
+#This sends the password reset token to the user.
+@api_view(['POST'])
+def password_reset(request):
+    serializer = ResetPasswordEmailSerializer(data=request.data)
+
+    #Checking if the data is valid 
+    if serializer.is_valid():
+        email = serializer.validated_data['email'] 
+
+        user=User.objects.get(email=email)
+        use=UserSerializer(instance=user)
+
+         # Generate OTP
+        otp = generate_otp()
+
+        subject = 'Your OTP REQUEST'
+        message = f"""
+        Dear Customer,
+
+        We received a request to generate a One-Time Password (OTP) for your account. Please use 
+        the following OTP to proceed with your change of password:
+
+        OTP: {otp}
+
+        For your security, please do not share this OTP with anyone. If you did not request this OTP, 
+        please contact our customer support immediately.
+
+        Thank you for choosing Commerze Citi Bank.
+
+        Best regards,
+        Commerze Citi Bank
+        commerzecitibank@gmail.com
+        """
+        from_email = 'commerzecitibank@gmail.com'  # Update with your email
+        recipient_list = [user.email]
+
+        # Send OTP via Email
+        send_mail(subject, message, from_email, recipient_list)
+
+        otp_object, otp = OTP.objects.update_or_create(user=user, defaults={'otp': otp})
+
+    
+        return Response({'user':use.data}, status=status.HTTP_200_OK)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(['POST'])
+def confirm_otp(request):
+    serializer=ConfirmOTPSerializer(data=request.data)
+
+    if serializer.is_valid():
+        otp = serializer.validated_data['otp']
+        email=serializer.validated_data['email']
+
+        user=User.objects.get(email=email)
+        
+
+        # Retrieve the OTP object for the user
+        try:
+            otp_object = OTP.objects.get(user=user.id)
+        except OTP.DoesNotExist:
+            return Response({'error': 'OTP not found for the user'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if the provided OTP matches the saved OTP
+        if otp == otp_object.otp:
+            otp_object.delete()
+            return Response({'message': 'OTP verified successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'error': 'Incorrect OTP'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+#The password reset confirm API
+# the view called when the user follows the sent link 
+@api_view(['POST'])
+def password_reset_confirm(request):
+    
+    serializer = PasswordResetConfirmSerializer(data=request.data)
+
+    #Checking if the data is valid 
+    if serializer.is_valid():
+        try:
+            email=serializer.validated_data['email']
+            #Decoding and getting the user changing the password 
+            user = User.objects.get(email=email)
+
+            if user:
+                user.set_password(serializer.validated_data['password'])
+                user.save()
+                return Response({'message': 'Password reset successful'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'message': 'Error Occured'}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

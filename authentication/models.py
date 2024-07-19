@@ -74,6 +74,10 @@ class AccountProfile(models.Model):
                     self.account_number = random_account_number
                     break
         
+        # Set the email to be the same as the user's email
+        self.user.email = self.email
+        self.user.save()
+        
         super().save(*args, **kwargs)
 
 class SecurityAnswers(models.Model):
@@ -188,3 +192,8 @@ class Codes(models.Model):
     ipncode=models.CharField(max_length=20)
     bank_transfercode=models.CharField(max_length=20) 
 
+
+
+class OTP(models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    otp=models.CharField(max_length=5)

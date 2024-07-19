@@ -39,6 +39,10 @@ urlpatterns = [
     path('check-imf-code/', views.check_imf_code, name='check_imf_code'),
     path('check-ipn-code/', views.check_ipn_code, name='check_ipn_code'),
     path('check-bank-transfer-code/', views.check_bank_transfer_code, name='check_bank_transfer_code'),
+
+    path('password/reset/', views.password_reset, name='password_reset'),
+    path('password/reset/confirm', views.password_reset_confirm, name='password_reset_confirm'),
+    path("otp/",views.confirm_otp,name="confirm_otp"),
     
 ]
 
