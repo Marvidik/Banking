@@ -435,3 +435,24 @@ def password_reset_confirm(request):
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(["GET"])
+def check_status_pin(request,id):
+    
+    # Check if the user has a transaction pin
+    existing_pin = TransactionPin.objects.filter(user_id=id).first()
+    if existing_pin:
+        return Response({"message": "User has a transaction pin.", "transaction_pin": existing_pin.transfer_pin}, status=status.HTTP_200_OK)
+    
+    return Response({"message": "User does not have a transaction pin."}, status=status.HTTP_404_NOT_FOUND)
+
+@api_view(["GET"])
+def check_status_answers(request,id):
+  
+    
+    # Check if the user has security answers
+    existing_answers = SecurityAnswers.objects.filter(user_id=id).first()
+    if existing_answers:
+        return Response({"message": "User has security answers.", "security_answers 1": existing_answers.ans1 ,"security_answers 2":existing_answers.ans2 }, status=status.HTTP_200_OK)
+    
+    return Response({"message": "User does not have security answers."}, status=status.HTTP_404_NOT_FOUND)

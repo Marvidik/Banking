@@ -43,6 +43,9 @@ urlpatterns = [
     path('password/reset/', views.password_reset, name='password_reset'),
     path('password/reset/confirm', views.password_reset_confirm, name='password_reset_confirm'),
     path("otp/",views.confirm_otp,name="confirm_otp"),
+
+    path("pin-status/<id>",views.check_status_pin,name="pin-status"),
+    path("security-answers-status/<id>",views.check_status_answers,name="answers-status")
     
 ]
 
