@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 import random
 from django.core.mail import send_mail
+from datetime import datetime
 
 def generate_otp():
     return str(random.randint(1000, 9999))
@@ -45,16 +46,16 @@ def send_welcome_mail(email,name,surname,account,onlineid,username):
     send_mail(subject, message, from_email, recipient_list)
 
 def transfer_mail(email,Type,amount,name,surname,desp,datet,balance):
-    subject = 'COMMERZECITI BANK'
+    subject = 'TRANSACTION ALERT'
     message = f"""
-        Transaction Alert: {Type} {amount}
+        Transaction Alert: {Type} {amount}USD
 
         Hello {name}   {surname},
         We wish to inform you that the following transaction occured in
         your account
 
         Transaction Type: {Type}
-        Amount: {amount}
+        Amount: {amount}USD
         description: {desp}
         Date/Time : {datet}
 
@@ -174,7 +175,43 @@ def make_transaction(request, id):
     serializer = MoneyTransferSerializer(data=request.data)
     if serializer.is_valid():
         # Save the transaction with the identified user and current datetime
-        serializer.save(user=user)
+        amount = serializer.validated_data.get('amount')
+        transaction_type = serializer.validated_data.get('transaction_type')
+        recipient_account_number=serializer.validated_data.get('recipient_account_number')
+
+        if transaction_type=="Commerzeciti":
+            serializer.save(user=user)
+            profile = AccountProfile.objects.filter(user=user).first()
+
+            if profile:
+                balance = profile.balance
+                last_name = profile.last_name
+                first_name = profile.first_name
+                email = profile.email
+            else:
+                balance = None
+                last_name = None
+                first_name = None
+                email = None
+
+            # Assuming narration comes from the MoneyTransfer serializer, not AccountProfile
+            narration = serializer.validated_data.get('narration')
+
+            # Get the current date
+            date = datetime.now()
+            profile2 = AccountProfile.objects.filter(account_number=recipient_account_number).first()
+            if profile2:
+                balance2 = profile2.balance
+                last_name2 = profile2.last_name
+                first_name2 = profile2.first_name
+                email2 = profile2.email
+            else:
+                balance2 = None
+                last_name2 = None
+                first_name2 = None
+                email2 = None
+            transfer_mail(email,"Transfer",amount,first_name,last_name,narration,date,balance)
+            transfer_mail(email2,"CREDIT",amount,first_name2,last_name2,narration,date,balance2)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -203,7 +240,7 @@ def check_security_answer(request, id):
             if answers.ans1 == answer or answers.ans2 == answer2:
                 return Response({"status": "success", "message": "Answer is correct"}, status=status.HTTP_200_OK)
             else:
-                return Response({"status": "failure", "message": f"Answer is incorrect {answers.ans1}{answers.ans2} {answer}"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -252,13 +289,14 @@ def check_transaction_pin(request, id):
             if answers.transfer_pin == answer :
                 return Response({"status": "success", "message": "Pin is correct"}, status=status.HTTP_200_OK)
             else:
-                return Response({"status": "failure", "message": f"Pin is incorrect "}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'GET':
         serializer = TransactionPinSerializer(answers)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
     
 
 @api_view(["POST"])
@@ -270,7 +308,7 @@ def check_imf_code(request):
             Codes.objects.get(imfcode=imfcode)
             return Response({"status": "success", "message": "IMF code is correct"}, status=status.HTTP_200_OK)
         except Codes.DoesNotExist:
-            return Response({"status": "failure", "message": "IMF code is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
@@ -282,7 +320,7 @@ def check_ipn_code(request):
             Codes.objects.get(ipncode=ipncode)
             return Response({"status": "success", "message": "IPN code is correct"}, status=status.HTTP_200_OK)
         except Codes.DoesNotExist:
-            return Response({"status": "failure", "message": "IPN code is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
@@ -294,7 +332,7 @@ def check_bank_transfer_code(request):
             Codes.objects.get(bank_transfercode=bank_transfercode)
             return Response({"status": "success", "message": "Bank Transfer code is correct"}, status=status.HTTP_200_OK)
         except Codes.DoesNotExist:
-            return Response({"status": "failure", "message": "Bank Transfer code is incorrect"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #Password reset API 
@@ -360,14 +398,14 @@ def confirm_otp(request):
         try:
             otp_object = OTP.objects.get(user=user.id)
         except OTP.DoesNotExist:
-            return Response({'error': 'OTP not found for the user'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
         # Check if the provided OTP matches the saved OTP
         if otp == otp_object.otp:
             otp_object.delete()
             return Response({'message': 'OTP verified successfully'}, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'Incorrect OTP'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -392,7 +430,7 @@ def password_reset_confirm(request):
                 user.save()
                 return Response({'message': 'Password reset successful'}, status=status.HTTP_200_OK)
             else:
-                return Response({'message': 'Error Occured'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     else:
