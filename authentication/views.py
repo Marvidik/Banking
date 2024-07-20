@@ -2,7 +2,8 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from .serializer import UserSerializer,MoneyTransferSerializer,LoginPinSerializer,AccountProfileSerializer,SecurityAnswersSerializer,TransactionPinSerializer,CodesSerializer,OTPSerializer,ConfirmOTPSerializer,ResetPasswordEmailSerializer,PasswordResetConfirmSerializer
 from .models import MoneyTransfer,LoginPins,BanUser,AccountProfile,SecurityAnswers,TransactionPin,Codes,OTP
@@ -127,6 +128,7 @@ def get_profile(request,id):
     return Response({'profile': serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
+@parser_classes([MultiPartParser, FormParser])
 def create_profile(request):
     serializer = AccountProfileSerializer(data=request.data)
     if serializer.is_valid():
@@ -141,9 +143,8 @@ def create_profile(request):
         profile = AccountProfile.objects.filter(last_name=last_name).values('account_number')
         account_number = profile.first().get('account_number') if profile.exists() else None
 
-        
-        onlineid=f'CMZB134{user.id}'
-        send_welcome_mail(email,first_name,last_name,account_number,onlineid,user.username)
+        onlineid = f'CMZB134{user.id}'
+        send_welcome_mail(email, first_name, last_name, account_number, onlineid, user.username)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
