@@ -345,40 +345,47 @@ def password_reset(request):
     if serializer.is_valid():
         email = serializer.validated_data['email'] 
 
-        user=User.objects.get(email=email)
-        use=UserSerializer(instance=user)
+        try:
+            user=User.objects.get(email=email)
+        except:
+            return Response({"message":"User with email does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-         # Generate OTP
-        otp = generate_otp()
+        if user:
+            use=UserSerializer(instance=user)
 
-        subject = 'Your OTP REQUEST'
-        message = f"""
-        Dear Customer,
+            # Generate OTP
+            otp = generate_otp()
 
-        We received a request to generate a One-Time Password (OTP) for your account. Please use 
-        the following OTP to proceed with your change of password:
+            subject = 'Your OTP REQUEST'
+            message = f"""
+            Dear Customer,
 
-        OTP: {otp}
+            We received a request to generate a One-Time Password (OTP) for your account. Please use 
+            the following OTP to proceed with your change of password:
 
-        For your security, please do not share this OTP with anyone. If you did not request this OTP, 
-        please contact our customer support immediately.
+            OTP: {otp}
 
-        Thank you for choosing Commerze Citi Bank.
+            For your security, please do not share this OTP with anyone. If you did not request this OTP, 
+            please contact our customer support immediately.
 
-        Best regards,
-        Commerze Citi Bank
-        commerzecitibank@gmail.com
-        """
-        from_email = 'commerzecitibank@gmail.com'  # Update with your email
-        recipient_list = [user.email]
+            Thank you for choosing Commerze Citi Bank.
 
-        # Send OTP via Email
-        send_mail(subject, message, from_email, recipient_list)
+            Best regards,
+            Commerze Citi Bank
+            commerzecitibank@gmail.com
+            """
+            from_email = 'commerzecitibank@gmail.com'  # Update with your email
+            recipient_list = [user.email]
 
-        otp_object, otp = OTP.objects.update_or_create(user=user, defaults={'otp': otp})
+            # Send OTP via Email
+            send_mail(subject, message, from_email, recipient_list)
 
-    
-        return Response({'user':use.data}, status=status.HTTP_200_OK)
+            otp_object, otp = OTP.objects.update_or_create(user=user, defaults={'otp': otp})
+
+        
+            return Response({'user':use.data}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message":"User with email does not exist"}, status=status.HTTP_404_NOT_FOUND)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
