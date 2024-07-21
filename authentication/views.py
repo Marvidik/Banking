@@ -144,7 +144,7 @@ def create_profile(request):
 
         onlineid = f'CMZB134{user.id}'
         send_welcome_mail(email, first_name, last_name, account_number, onlineid, user.username)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response({'profile': serializer.data}, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
