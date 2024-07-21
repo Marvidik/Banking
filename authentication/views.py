@@ -128,7 +128,6 @@ def get_profile(request,id):
     return Response({'profile': serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
-@parser_classes([MultiPartParser, FormParser])
 def create_profile(request):
     serializer = AccountProfileSerializer(data=request.data)
     if serializer.is_valid():
