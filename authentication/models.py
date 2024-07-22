@@ -30,8 +30,8 @@ class AccountProfile(models.Model):
 
     #Identity
     id_type=models.CharField(max_length=30)
-    passport=models.ImageField(null=True)
-    client_id=models.ImageField(null=True)
+    passport=models.ImageField()
+    client_id=models.ImageField()
     id_number=models.CharField(max_length=30)
     
     # Address Information
