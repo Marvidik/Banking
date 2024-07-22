@@ -37,7 +37,7 @@ class AccountProfile(models.Model):
     # Address Information
     street_address = models.CharField(max_length=100)
     city = models.CharField(max_length=50)
-    state = models.CharField(max_length=2)
+    state = models.CharField(max_length=50)
     zip_code = models.CharField(max_length=10)
     account_number=models.CharField(max_length=12,null=True,unique=True)
     
