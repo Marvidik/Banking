@@ -126,7 +126,7 @@ class MoneyTransfer(models.Model):
         account = AccountProfile.objects.get(user=self.user)
 
         # Check if the user has sufficient balance
-        if self.transaction_type == "Transfer" or self.transaction_type == "Atm":
+        if self.transaction_type == "International" or self.transaction_type == "Local":
             if self.amount > account.balance:
                 raise ValidationError('Insufficient funds')
 

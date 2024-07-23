@@ -179,9 +179,9 @@ def make_transaction(request, id):
         amount = serializer.validated_data.get('amount')
         transaction_type = serializer.validated_data.get('transaction_type')
         recipient_account_number=serializer.validated_data.get('recipient_account_number')
-
+        serializer.save(user=user)
         if transaction_type=="Commerzeciti":
-            serializer.save(user=user)
+            
             profile = AccountProfile.objects.filter(user=user).first()
 
             if profile:
@@ -290,7 +290,7 @@ def check_transaction_pin(request, id):
             if answers.transfer_pin == answer :
                 return Response({"status": "success", "message": "Pin is correct"}, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"status": "Failed", "message": "Pin is not correct"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
