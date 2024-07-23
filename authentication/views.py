@@ -14,6 +14,7 @@ from rest_framework.decorators import permission_classes
 import random
 from django.core.mail import send_mail
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 def generate_otp():
     return str(random.randint(1000, 9999))
@@ -173,47 +174,51 @@ def make_transaction(request, id):
         # If the BanUser record does not exist, assume the user is not banned
         pass
 
-    serializer = MoneyTransferSerializer(data=request.data)
-    if serializer.is_valid():
-        # Save the transaction with the identified user and current datetime
-        amount = serializer.validated_data.get('amount')
-        transaction_type = serializer.validated_data.get('transaction_type')
-        recipient_account_number=serializer.validated_data.get('recipient_account_number')
-        serializer.save(user=user)
-        if transaction_type=="Commerzeciti":
-            
-            profile = AccountProfile.objects.filter(user=user).first()
+    
+    try:
+        serializer = MoneyTransferSerializer(data=request.data)
+        if serializer.is_valid():
+            # Save the transaction with the identified user and current datetime
+            amount = serializer.validated_data.get('amount')
+            transaction_type = serializer.validated_data.get('transaction_type')
+            recipient_account_number=serializer.validated_data.get('recipient_account_number')
+            serializer.save(user=user)
+            if transaction_type=="Commerzeciti":
+                
+                profile = AccountProfile.objects.filter(user=user).first()
 
-            if profile:
-                balance = profile.balance
-                last_name = profile.last_name
-                first_name = profile.first_name
-                email = profile.email
-            else:
-                balance = None
-                last_name = None
-                first_name = None
-                email = None
+                if profile:
+                    balance = profile.balance
+                    last_name = profile.last_name
+                    first_name = profile.first_name
+                    email = profile.email
+                else:
+                    balance = None
+                    last_name = None
+                    first_name = None
+                    email = None
 
-            # Assuming narration comes from the MoneyTransfer serializer, not AccountProfile
-            narration = serializer.validated_data.get('narration')
+                # Assuming narration comes from the MoneyTransfer serializer, not AccountProfile
+                narration = serializer.validated_data.get('narration')
 
-            # Get the current date
-            date = datetime.now()
-            profile2 = AccountProfile.objects.filter(account_number=recipient_account_number).first()
-            if profile2:
-                balance2 = profile2.balance
-                last_name2 = profile2.last_name
-                first_name2 = profile2.first_name
-                email2 = profile2.email
-            else:
-                balance2 = None
-                last_name2 = None
-                first_name2 = None
-                email2 = None
-            transfer_mail(email,"Transfer",amount,first_name,last_name,narration,date,balance)
-            transfer_mail(email2,"CREDIT",amount,first_name2,last_name2,narration,date,balance2)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                # Get the current date
+                date = datetime.now()
+                profile2 = AccountProfile.objects.filter(account_number=recipient_account_number).first()
+                if profile2:
+                    balance2 = profile2.balance
+                    last_name2 = profile2.last_name
+                    first_name2 = profile2.first_name
+                    email2 = profile2.email
+                else:
+                    balance2 = None
+                    last_name2 = None
+                    first_name2 = None
+                    email2 = None
+                transfer_mail(email,"Transfer",amount,first_name,last_name,narration,date,balance)
+                transfer_mail(email2,"CREDIT",amount,first_name2,last_name2,narration,date,balance2)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    except ValidationError as e:
+            return Response({"error": str(e)[2:19]}, status=status.HTTP_400_BAD_REQUEST)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
