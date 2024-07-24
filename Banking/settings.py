@@ -77,6 +77,12 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+CORS_ALLOWED_ORIGINS = [
+    "*",
+    "banko.pythonanywhere.com"
+]
+
+
 
 ROOT_URLCONF = "Banking.urls"
 
