@@ -246,7 +246,7 @@ def check_security_answer(request, id):
             if answers.ans1 == answer or answers.ans2 == answer2:
                 return Response({"status": "success", "message": "Answer is correct"}, status=status.HTTP_200_OK)
             else:
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"status": "failed", "message": "Answer is Wrong"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
