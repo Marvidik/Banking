@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-6z&g+xi16h0tv01tu1^xks!kp76atfqpll(43)g*nwj=(6c@#k
 DEBUG = True
 
 ALLOWED_HOSTS = ["*","banko.pythonanywhere.com"]
-CORS_ALLOW_ALL_ORIGINS = True
+
 
 
 
@@ -78,8 +78,8 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "*",
-    "banko.pythonanywhere.com"
+    "http://banko.pythonanywhere.com",
+    "https://www.commerzeciti.com",
 ]
 
 
