@@ -77,9 +77,12 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
-CORS_ALLOWED_ORIGINS = [
+CORS_ALLOW_ALL_ORIGINS = True
+
+
+CSRF_TRUSTED_ORIGINS = [
     "http://banko.pythonanywhere.com",
-    "https://www.commerzeciti.com",
+    "https://www.commerzeciti.com",  
 ]
 
 
