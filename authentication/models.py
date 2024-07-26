@@ -28,7 +28,7 @@ class AccountProfile(models.Model):
     phone_number = models.CharField(max_length=15)
     occupation=models.CharField(max_length=30)
 
-    #Identity
+    #Identity 
     id_type=models.CharField(max_length=30)
     passport=models.ImageField()
     client_id=models.ImageField()
@@ -40,6 +40,8 @@ class AccountProfile(models.Model):
     state = models.CharField(max_length=50)
     zip_code = models.CharField(max_length=10)
     account_number=models.CharField(max_length=12,null=True,unique=True)
+
+    verified=models.BooleanField(default=False,null=True)
     
     # Account Information
     ACCOUNT_TYPES = [
@@ -145,6 +147,7 @@ class MoneyTransfer(models.Model):
             recipient_account = self.validate_recipient_account(self.recipient_account_number)
             if recipient_account:
                 account.balance -= self.amount
+                self.status_type='APPROVED'
                 account.save()
                 recipient_account.save()
                 # Create a "Received" transaction entry for the recipient
