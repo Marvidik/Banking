@@ -39,7 +39,7 @@ class AccountProfileSerializer(serializers.ModelSerializer):
 class MoneyTransferSerializer(serializers.ModelSerializer):
     class Meta:
         model = MoneyTransfer
-        fields = ['user', 'recipient_name', 'recipient_account_number', 'recipient_routing_number', 'recipient_bank_name', 'amount','status_type','date','transaction_type']
+        fields = ['id','user', 'recipient_name', 'recipient_account_number', 'recipient_routing_number', 'recipient_bank_name', 'amount','status_type','date','transaction_type']
 
 
 
