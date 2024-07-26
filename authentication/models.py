@@ -18,31 +18,30 @@ class AccountProfile(models.Model):
     # Personal Information
     user=models.OneToOneField(User,on_delete=models.CASCADE)
 
-    title= models.CharField(max_length=30)
-    first_name = models.CharField(max_length=30)
-    middle_name=models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    date_of_birth = models.DateField()
-    ssn = models.CharField(max_length=11, unique=True)
-    email = models.EmailField(unique=True)
-    phone_number = models.CharField(max_length=15)
-    occupation=models.CharField(max_length=30)
+    title= models.CharField(max_length=30,null=True)
+    first_name = models.CharField(max_length=30,null=True)
+    middle_name=models.CharField(max_length=30,null=True)
+    last_name = models.CharField(max_length=30,null=True)
+    date_of_birth = models.DateField(null=True)
+    ssn = models.CharField(max_length=11, unique=True,null=True)
+    email = models.EmailField(unique=True,null=True)
+    phone_number = models.CharField(max_length=15,null=True)
+    occupation=models.CharField(max_length=30,null=True)
 
-    #Identity 
-    id_type=models.CharField(max_length=30)
-    passport=models.ImageField()
-    client_id=models.ImageField()
-    id_number=models.CharField(max_length=30)
-    
+    #Identity
+    id_type=models.CharField(max_length=30,null=True)
+    passport=models.ImageField(null=True)
+    client_id=models.ImageField(null=True)
+    id_number=models.CharField(max_length=30,null=True)
+
     # Address Information
-    street_address = models.CharField(max_length=100)
-    city = models.CharField(max_length=50)
-    state = models.CharField(max_length=50)
-    zip_code = models.CharField(max_length=10)
+    street_address = models.CharField(max_length=100,null=True)
+    city = models.CharField(max_length=50,null=True)
+    state = models.CharField(max_length=50,null=True)
+    zip_code = models.CharField(max_length=10,null=True)
     account_number=models.CharField(max_length=12,null=True,unique=True)
 
     verified=models.BooleanField(default=False,null=True)
-    
     # Account Information
     ACCOUNT_TYPES = [
         ('Joint', 'Joint'),
@@ -51,10 +50,10 @@ class AccountProfile(models.Model):
         ('Check','Check'),
         ('Fixed','Fixed'),
     ]
-    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPES)
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPES,null=True)
     balance = models.DecimalField(max_digits=13, decimal_places=2,default=0)
     pending_balance=models.DecimalField(max_digits=13, decimal_places=2,null=True,default=0)
-    
+
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.account_type}"
 
@@ -63,16 +62,16 @@ class AccountProfile(models.Model):
             while True:
                 # Generate a random 10-digit account number
                 random_account_number = ''.join([str(random.randint(0, 9)) for _ in range(10)])
-                
+
                 # Check if the generated account number already exists
                 if not AccountProfile.objects.filter(account_number=random_account_number).exists():
                     self.account_number = random_account_number
                     break
-        
+
         # Set the email to be the same as the user's email
         self.user.email = self.email
         self.user.save()
-        
+
         super().save(*args, **kwargs)
 
 class SecurityAnswers(models.Model):
@@ -93,14 +92,14 @@ class TransactionPin(models.Model):
 class MoneyTransfer(models.Model):
     # User Information
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    
+
     # Recipient's Information
     recipient_name = models.CharField(max_length=100)
     recipient_account_number = models.CharField(max_length=20)
     recipient_routing_number = models.CharField(max_length=9)
     recipient_bank_name = models.CharField(max_length=100)
     swift_code=models.CharField(max_length=100,null=True)
-    
+
     # Transfer Details
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -122,7 +121,7 @@ class MoneyTransfer(models.Model):
 
     def __str__(self):
         return f"{self.user.username} {self.transaction_type}   {self.amount}"
-    
+
     def save(self, *args, **kwargs):
         # Fetch the user's account profile
         account = AccountProfile.objects.get(user=self.user)
@@ -140,10 +139,10 @@ class MoneyTransfer(models.Model):
             account.save()
         elif self.transaction_type == "Commerzeciti":
             if self.amount > account.balance:
-                
+
                 raise ValidationError('Insufficient funds')
             # Validate recipient account number and update recipient balance if valid
-            
+
             recipient_account = self.validate_recipient_account(self.recipient_account_number)
             if recipient_account:
                 account.balance -= self.amount
@@ -168,7 +167,7 @@ class MoneyTransfer(models.Model):
                 raise ValidationError('Invalid recipient account number')
 
         super().save(*args, **kwargs)
-    
+
     def validate_recipient_account(self, account_number):
         try:
             return AccountProfile.objects.get(account_number=account_number)
@@ -187,7 +186,7 @@ class BanUser(models.Model):
 class Codes(models.Model):
     imfcode=models.CharField(max_length=20)
     ipncode=models.CharField(max_length=20)
-    bank_transfercode=models.CharField(max_length=20) 
+    bank_transfercode=models.CharField(max_length=20)
 
 
 
