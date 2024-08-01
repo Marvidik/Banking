@@ -16,31 +16,12 @@ from django.core.mail import send_mail
 from django.utils.html import format_html
 from datetime import datetime
 from django.core.exceptions import ValidationError
-import os
+from .utils import send_welcome_mail
 
 def generate_otp():
     return str(random.randint(1000, 9999))
 
-def send_welcome_mail(email, name, surname, account, onlineid, username):
-    subject = 'WELCOME TO COMMERZECITI BANK'
 
-    # Read the HTML template file
-    template_path = os.path.join(os.path.dirname(__file__), 'gg.html')
-    with open(template_path, 'r') as file:
-        html_template = file.read()
-    # Format the template with user details
-    message = format_html(html_template.format(
-        name=name,
-        surname=surname,
-        account=account,
-        onlineid=onlineid,
-        username=username
-    ))
-
-    from_email = 'commerzecitibank@gmail.com'  # Update with your email
-    recipient_list = [email]
-
-    send_mail(subject, '', from_email, recipient_list, html_message=message)
 
 def transfer_mail(email,Type,amount,name,surname,desp,datet,balance):
     subject = 'TRANSACTION ALERT'
