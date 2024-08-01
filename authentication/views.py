@@ -16,52 +16,26 @@ from django.core.mail import send_mail
 from django.utils.html import format_html
 from datetime import datetime
 from django.core.exceptions import ValidationError
+import os
 
 def generate_otp():
     return str(random.randint(1000, 9999))
 
 def send_welcome_mail(email, name, surname, account, onlineid, username):
     subject = 'WELCOME TO COMMERZECITI BANK'
-    message = format_html("""
-        <html>
-            <body style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc; border-radius: 10px;">
-                <table width="100%" cellpadding="0" cellspacing="0" border="0">
-                    <tr>
-                        <td style="text-align: center; padding: 10px 0;">
-                            <h2 style="color: #4CAF50; margin: 0;">WELCOME TO COMMERZECITI BANK</h2>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 10px 0;">
-                            <p>Hello <strong>{name} {surname}</strong>,</p>
-                            <p>We would like to inform you that your bank account has been 
-                            successfully created and it is now fully active.</p>
-                            <p>Your Account Information is as follows:</p>
-                            <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                                <tr>
-                                    <td style="border: 1px solid #ccc; padding: 8px;"><strong>Account Number:</strong></td>
-                                    <td style="border: 1px solid #ccc; padding: 8px;">{account}</td>
-                                </tr>
-                                <tr>
-                                    <td style="border: 1px solid #ccc; padding: 8px;"><strong>Online ID:</strong></td>
-                                    <td style="border: 1px solid #ccc; padding: 8px;">{onlineid}</td>
-                                </tr>
-                                <tr>
-                                    <td style="border: 1px solid #ccc; padding: 8px;"><strong>Username:</strong></td>
-                                    <td style="border: 1px solid #ccc; padding: 8px;">{username}</td>
-                                </tr>
-                            </table>
-                            <p style="margin-top: 20px;">NOTE: Please do not disclose your internet banking online ID,
-                            password, OTP details, or other sensitive information to a third 
-                            party.</p>
-                            <p>Thank you for choosing Commerze Citi Bank.</p>
-                            <p style="text-align: center; margin-top: 20px;">&copy; 2002-2024 All rights reserved Commerze Citi Bank</p>
-                        </td>
-                    </tr>
-                </table>
-            </body>
-        </html>
-        """, name=name, surname=surname, account=account, onlineid=onlineid, username=username)
+
+    # Read the HTML template file
+    template_path = os.path.join(os.path.dirname(__file__), 'gg.html')
+    with open(template_path, 'r') as file:
+        html_template = file.read()
+    # Format the template with user details
+    message = format_html(html_template.format(
+        name=name,
+        surname=surname,
+        account=account,
+        onlineid=onlineid,
+        username=username
+    ))
 
     from_email = 'commerzecitibank@gmail.com'  # Update with your email
     recipient_list = [email]
