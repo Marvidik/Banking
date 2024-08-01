@@ -314,3 +314,5 @@ def send_welcome_mail(email, name, surname, account, onlineid, username):
 
     send_mail(subject, '', from_email, recipient_list, html_message=message)
 
+
+

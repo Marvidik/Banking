@@ -16,12 +16,98 @@ from django.core.mail import send_mail
 from django.utils.html import format_html
 from datetime import datetime
 from django.core.exceptions import ValidationError
-from .utils import send_welcome_mail
 
 def generate_otp():
     return str(random.randint(1000, 9999))
 
+def send_welcome_mail(email, name, surname, account, onlineid, username):
+    subject = 'WELCOME TO COMMERZECITI BANK'
+    message = format_html("""
+        <!doctype html>
+        <html lang="en">
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f5f6;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .email-container {{
+                    max-width: 600px;
+                    margin: auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                    border: 1px solid #ccc;
+                    border-radius: 10px;
+                }}
+                h2 {{
+                    color: #4CAF50;
+                    margin: 0;
+                    padding-bottom: 10px;
+                }}
+                p {{
+                    color: #333;
+                    line-height: 1.6;
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                }}
+                table td {{
+                    border: 1px solid #ccc;
+                    padding: 8px;
+                }}
+                .footer {{
+                    text-align: center;
+                    padding-top: 20px;
+                    color: #9a9ea6;
+                    font-size: 16px;
+                }}
+                @media only screen and (max-width: 640px) {{
+                    .email-container {{
+                        padding: 10px;
+                    }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <h2>WELCOME TO COMMERZECITI BANK</h2>
+                <p>Hello <strong>{name} {surname}</strong>,</p>
+                <p>We would like to inform you that your bank account has been successfully created and it is now fully active.</p>
+                <p>Your Account Information is as follows:</p>
+                <table>
+                    <tr>
+                        <td><strong>Account Number:</strong></td>
+                        <td>{account}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Online ID:</strong></td>
+                        <td>{onlineid}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Username:</strong></td>
+                        <td>{username}</td>
+                    </tr>
+                </table>
+                <p style="margin-top: 20px;">NOTE: Please do not disclose your internet banking online ID, password, OTP details, or other sensitive information to a third party.</p>
+                <p>Thank you for choosing Commerze Citi Bank.</p>
+                <div class="footer">
+                    <p>&copy; 2002-2024 All rights reserved Commerze Citi Bank</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """, name=name, surname=surname, account=account, onlineid=onlineid, username=username)
 
+    from_email = 'commerzecitibank@gmail.com'  # Update with your email
+    recipient_list = [email]
+
+    send_mail(subject, '', from_email, recipient_list, html_message=message)
 
 def transfer_mail(email,Type,amount,name,surname,desp,datet,balance):
     subject = 'TRANSACTION ALERT'
