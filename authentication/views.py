@@ -13,39 +13,40 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 import random
 from django.core.mail import send_mail
+from django.utils.html import format_html
 from datetime import datetime
 from django.core.exceptions import ValidationError
 
 def generate_otp():
     return str(random.randint(1000, 9999))
 
-def send_welcome_mail(email,name,surname,account,onlineid,username):
+def send_welcome_mail(email, name, surname, account, onlineid, username):
     subject = 'WELCOME TO COMMERZECITI BANK'
-    message = f"""
-        Hello {name}   {surname},
+    message = format_html("""
+        <html>
+            <body style="font-family: Arial, sans-serif; color: #333;">
+                <p>Hello <strong>{name} {surname}</strong>,</p>
+                <p>We would like to inform you that your bank account has been 
+                successfully created and it is now fully active.</p>
+                <p>Your Account Information is as follows:</p>
+                <ul style="list-style-type: none; padding: 0;">
+                    <li><strong>Account Number:</strong> {account}</li>
+                    <li><strong>Online ID:</strong> {onlineid}</li>
+                    <li><strong>Username:</strong> {username}</li>
+                </ul>
+                <p>NOTE: Please do not disclose your internet banking online ID,
+                password, OTP details, or other sensitive information to a third 
+                party.</p>
+                <p>Thank you for choosing Commerze Citi Bank.</p>
+                <p>&copy; 2002-2024 All rights reserved Commerze Citi Bank</p>
+            </body>
+        </html>
+        """, name=name, surname=surname, account=account, onlineid=onlineid, username=username)
 
-        We would like to inform you that your bank account has been 
-        successfully created and it is now fully active.
-
-        Your Account Information are as follows:
-
-        Account Number: {account}
-        Online ID: {onlineid}
-        Username: {username}
-
-        NOTE: Please do not disclose your internet banking online ID,
-        password , otp details or other sensitive information to a third 
-        party.
-
-        Thank you for choosing Commerze Citi Bank.
-        
-        © 2002-2024 All right reserved Commerze Citi Bank
-        """
     from_email = 'commerzecitibank@gmail.com'  # Update with your email
     recipient_list = [email]
 
-    # Send OTP via Email
-    send_mail(subject, message, from_email, recipient_list)
+    send_mail(subject, '', from_email, recipient_list, html_message=message)
 
 def transfer_mail(email,Type,amount,name,surname,desp,datet,balance):
     subject = 'TRANSACTION ALERT'
