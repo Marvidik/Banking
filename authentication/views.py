@@ -109,32 +109,107 @@ def send_welcome_mail(email, name, surname, account, onlineid, username):
 
     send_mail(subject, '', from_email, recipient_list, html_message=message)
 
-def transfer_mail(email,Type,amount,name,surname,desp,datet,balance):
+def transfer_mail(email, Type, amount, name, surname, desp, datet, balance):
     subject = 'TRANSACTION ALERT'
-    message = f"""
-        Transaction Alert: {Type} {amount}USD
+    message = format_html("""
+        <!doctype html>
+        <html lang="en">
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f5f6;
+                    margin: 0;
+                    padding: 0;
+                }}
+                .email-container {{
+                    max-width: 600px;
+                    margin: auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                    border: 1px solid #ccc;
+                    border-radius: 10px;
+                }}
+                h2 {{
+                    color: #4CAF50;
+                    margin: 0;
+                    padding-bottom: 10px;
+                }}
+                p {{
+                    color: #333;
+                    line-height: 1.6;
+                }}
+                table {{
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                }}
+                table td {{
+                    border: 1px solid #ccc;
+                    padding: 8px;
+                }}
+                .footer {{
+                    text-align: center;
+                    padding-top: 20px;
+                    color: #9a9ea6;
+                    font-size: 16px;
+                }}
+                @media only screen and (max-width: 640px) {{
+                    .email-container {{
+                        padding: 10px;
+                    }}
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="email-container">
+                <h2>TRANSACTION ALERT</h2>
+                <p>Hello <strong>{name} {surname}</strong>,</p>
+                <p>We wish to inform you that the following transaction occurred in your account:</p>
+                <table>
+                    <tr>
+                        <td><strong>Transaction Type:</strong></td>
+                        <td>{Type}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Amount:</strong></td>
+                        <td>{amount} USD</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Description:</strong></td>
+                        <td>{desp}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date/Time:</strong></td>
+                        <td>{datet}</td>
+                    </tr>
+                </table>
+                <p style="margin-top: 20px;">The balance on this account as at {datet} is as follows:</p>
+                <table>
+                    <tr>
+                        <td><strong>Current Balance:</strong></td>
+                        <td>{balance} USD</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Available Balance:</strong></td>
+                        <td>{balance} USD</td>
+                    </tr>
+                </table>
+                <div class="footer">
+                    <p>&copy; 2002-2024 All rights reserved Commerze Citi Bank</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """, name=name, surname=surname, Type=Type, amount=amount, desp=desp, datet=datet, balance=balance)
 
-        Hello {name}   {surname},
-        We wish to inform you that the following transaction occured in
-        your account
-
-        Transaction Type: {Type}
-        Amount: {amount}USD
-        description: {desp}
-        Date/Time : {datet}
-
-        The balance on this account as at {datet} are as follows 
-
-        Current Balance: {balance}USD
-        Available Balance: {balance}USD
-        
-        © 2002-2024 All right reserved Commerze Citi Bank
-        """
     from_email = 'your_email@example.com'  # Update with your email
     recipient_list = [email]
 
-    # Send OTP via Email
-    send_mail(subject, message, from_email, recipient_list)
+    # Send email
+    send_mail(subject, '', from_email, recipient_list, html_message=message)
 
 # The login API 
 @api_view(['POST'])
