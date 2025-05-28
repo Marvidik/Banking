@@ -84,7 +84,7 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")]
+CSRF_TRUSTED_ORIGINS = ['http://banko.pythonanywhere.com','https://www.commerzeciti.com','*']
 
 
 
