@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-6z&g+xi16h0tv01tu1^xks!kp76atfqpll(43)g*nwj=(6c@#k"
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -80,10 +84,7 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_ALL_ORIGINS = True
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://banko.pythonanywhere.com",
-    "https://www.commerzeciti.com",  
-]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")]
 
 
 
@@ -171,14 +172,15 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 465
-#EMAIL_USE_TLS = True
-EMAIL_USE_SSL=True
-EMAIL_HOST_USER = 'commerzecitibank@gmail.com'
-EMAIL_HOST_PASSWORD = "tyks gtzb ncaw fnsv"  # You need to replace 'your_gmail_password' with your actual Gmail account password
-DEFAULT_FROM_EMAIL = 'commerzecitibank@gmail.com'
-food_coupon_code="vmcy dbwq wihb fhxy"
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+
+

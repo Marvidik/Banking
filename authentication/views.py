@@ -16,13 +16,21 @@ from django.core.mail import send_mail
 from django.utils.html import format_html
 from datetime import datetime
 from django.core.exceptions import ValidationError
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+
+BANK_NAME= os.getenv("BANK_NAME")
 
 def generate_otp():
     return str(random.randint(1000, 9999))
 
 def send_welcome_mail(email, name, surname, account, onlineid, username):
-    subject = 'WELCOME TO COMMERZECITI BANK'
-    message = format_html("""
+    try:
+        subject = f'WELCOME TO {BANK_NAME}'
+        message = format_html("""
         <!doctype html>
         <html lang="en">
         <head>
@@ -76,7 +84,7 @@ def send_welcome_mail(email, name, surname, account, onlineid, username):
         </head>
         <body>
             <div class="email-container">
-                <h2>WELCOME TO COMMERZECITI BANK</h2>
+                <h2>WELCOME TO </h2>
                 <p>Hello <strong>{name} {surname}</strong>,</p>
                 <p>We would like to inform you that your bank account has been successfully created and it is now fully active.</p>
                 <p>Your Account Information is as follows:</p>
@@ -95,23 +103,28 @@ def send_welcome_mail(email, name, surname, account, onlineid, username):
                     </tr>
                 </table>
                 <p style="margin-top: 20px;">NOTE: Please do not disclose your internet banking online ID, password, OTP details, or other sensitive information to a third party.</p>
-                <p>Thank you for choosing Commerze Citi Bank.</p>
+                <p>Thank you for choosing Us.</p>
                 <div class="footer">
-                    <p>&copy; 2002-2024 All rights reserved Commerze Citi Bank</p>
+                    <p>&copy; 2025 All rights reserved </p>
                 </div>
             </div>
         </body>
         </html>
         """, name=name, surname=surname, account=account, onlineid=onlineid, username=username)
 
-    from_email = 'commerzecitibank@gmail.com'  # Update with your email
-    recipient_list = [email]
+        from_email =os.getenv('DEFAULT_FROM_EMAIL')
+        recipient_list = [email]
 
-    send_mail(subject, '', from_email, recipient_list, html_message=message)
+        send_mail(subject, '', from_email, recipient_list, html_message=message, fail_silently=False)
+        return True
+    except Exception as e:
+        print(f"Error sending welcome email: {str(e)}")
+        return False
 
 def transfer_mail(email, Type, amount, name, surname, desp, datet, balance):
-    subject = 'TRANSACTION ALERT'
-    message = format_html("""
+    try:
+        subject = 'TRANSACTION ALERT'
+        message = format_html("""
         <!doctype html>
         <html lang="en">
         <head>
@@ -198,18 +211,21 @@ def transfer_mail(email, Type, amount, name, surname, desp, datet, balance):
                     </tr>
                 </table>
                 <div class="footer">
-                    <p>&copy; 2002-2024 All rights reserved Commerze Citi Bank</p>
+                    <p>&copy; 2025 All rights reserved</p>
                 </div>
             </div>
         </body>
         </html>
         """, name=name, surname=surname, Type=Type, amount=amount, desp=desp, datet=datet, balance=balance)
 
-    from_email = 'your_email@example.com'  # Update with your email
-    recipient_list = [email]
+        from_email = os.getenv('EMAIL_HOST_USER')
+        recipient_list = [email]
 
-    # Send email
-    send_mail(subject, '', from_email, recipient_list, html_message=message)
+        send_mail(subject, '', from_email, recipient_list, html_message=message)
+        return True
+    except Exception as e:
+        print(f"Error sending transfer email: {str(e)}")
+        return False
 
 # The login API 
 @api_view(['POST'])
@@ -517,7 +533,7 @@ def password_reset(request):
             Commerze Citi Bank
             commerzecitibank@gmail.com
             """
-            from_email = 'commerzecitibank@gmail.com'  # Update with your email
+            from_email = 'admin.capitalbk@cepadel.com' # Update with your email
             recipient_list = [user.email]
 
             # Send OTP via Email
