@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
+from django.urls import path,include
 from authentication import views 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -25,6 +25,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path('super/', include('superior.urls')),
+
     path("login/",views.login,name="login"),
     path("register/",views.register,name="register"),
     path("transactions/<id>/",views.get_transactions, name="transaction"),

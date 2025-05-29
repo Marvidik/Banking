@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'authentication',
     'corsheaders',
+    'superior',
 ]
 
 MIDDLEWARE = [
@@ -118,6 +119,8 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+
 
 
 # Password validation
