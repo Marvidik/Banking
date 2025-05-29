@@ -277,3 +277,20 @@ def manage_login_pin(request):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
+    
+
+
+
+@api_view(['PATCH'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def verify_user(request, user_id):
+    try:
+        profile = AccountProfile.objects.get(user__id=user_id)
+    except AccountProfile.DoesNotExist:
+        return Response({"detail": "User profile not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    profile.verified = True
+    profile.save()
+
+    return Response({"detail": "User verified successfully."}, status=status.HTTP_200_OK)

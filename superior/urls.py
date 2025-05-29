@@ -19,4 +19,5 @@ urlpatterns = [
 
     path('manage/codes/', views.manage_codes,name="mans"),
     path('manage/login-pin/', views.manage_login_pin,name="manss"),
+    path('verify-user/<int:user_id>/', views.verify_user, name='verify-user'),
 ]
