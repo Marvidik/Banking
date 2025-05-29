@@ -112,8 +112,8 @@ class MoneyTransfer(models.Model):
     TRANS_TYPES = [
         ('Received', 'Received'),
         ('Local', 'Local'),
-        ('International', 'International'),
-        ('Commerzeciti','Commerzeciti'),
+        ('International', 'Inter-bank'),
+        ('Inter-bank','Commerzeciti'),
         ('Atm', 'Atm'),
     ]
     transaction_type=models.CharField(max_length=20, choices=TRANS_TYPES,default="Transfer",null=True)
@@ -137,7 +137,7 @@ class MoneyTransfer(models.Model):
         elif self.transaction_type == "Received":
             account.balance += self.amount
             account.save()
-        elif self.transaction_type == "Commerzeciti":
+        elif self.transaction_type == "Inter-bank":
             if self.amount > account.balance:
 
                 raise ValidationError('Insufficient funds')

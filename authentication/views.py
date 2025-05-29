@@ -336,7 +336,7 @@ def make_transaction(request, id):
             transaction_type = serializer.validated_data.get('transaction_type')
             recipient_account_number=serializer.validated_data.get('recipient_account_number')
             serializer.save(user=user)
-            if transaction_type=="Commerzeciti":
+            if transaction_type=="Inter-bank":
                 
                 profile = AccountProfile.objects.filter(user=user).first()
 
@@ -527,11 +527,10 @@ def password_reset(request):
             For your security, please do not share this OTP with anyone. If you did not request this OTP, 
             please contact our customer support immediately.
 
-            Thank you for choosing Commerze Citi Bank.
+            Thank you for choosing Us.
 
             Best regards,
-            Commerze Citi Bank
-            commerzecitibank@gmail.com
+            
             """
             from_email = 'admin.capitalbk@cepadel.com' # Update with your email
             recipient_list = [user.email]
