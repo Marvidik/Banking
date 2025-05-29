@@ -104,30 +104,39 @@ def user_detail(request, user_id):
 
     user_data = UserSerializer(user).data
 
-    # Include profile info
     try:
         profile = user.accountprofile
         profile_data = AccountProfileSerializer(profile).data
     except AccountProfile.DoesNotExist:
         profile_data = None
 
-    # Include security answers
     security_answers = SecurityAnswers.objects.filter(user=user).first()
     security_answers_data = SecurityAnswersSerializer(security_answers).data if security_answers else None
 
-    # Include transaction pin
     try:
         transaction_pin = TransactionPin.objects.get(user=user)
         transaction_pin_data = TransactionPinSerializer(transaction_pin).data
     except TransactionPin.DoesNotExist:
         transaction_pin_data = None
 
-    # Include OTP info
     try:
         otp = OTP.objects.get(user=user)
         otp_data = OTPSerializer(otp).data
     except OTP.DoesNotExist:
         otp_data = None
+
+    # Select only the needed fields for transactions
+    transactions = MoneyTransfer.objects.filter(user=user).order_by('-date')
+    transactions_data = [
+        {
+            "Date": t.date.strftime("%Y-%m-%d %H:%M"),
+            "Type": t.transaction_type,
+            "Amount": str(t.amount),
+            "Status": t.status_type,
+            "Details": f"To {t.recipient_name} ({t.recipient_bank_name} - {t.recipient_account_number})"
+        }
+        for t in transactions
+    ]
 
     combined_data = {
         "user": user_data,
@@ -135,9 +144,12 @@ def user_detail(request, user_id):
         "security_answers": security_answers_data,
         "transaction_pin": transaction_pin_data,
         "otp": otp_data,
+        "transactions": transactions_data,
     }
 
     return Response(combined_data)
+
+
 
 
 @api_view(['POST'])
