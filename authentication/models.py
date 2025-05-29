@@ -113,7 +113,7 @@ class MoneyTransfer(models.Model):
         ('Received', 'Received'),
         ('Local', 'Local'),
         ('International', 'Inter-bank'),
-        ('Inter-bank','Commerzeciti'),
+        ('Inter-bank','Inter-bank'),
         ('Atm', 'Atm'),
     ]
     transaction_type=models.CharField(max_length=20, choices=TRANS_TYPES,default="Transfer",null=True)
