@@ -4,6 +4,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ValidationError
+
 
 from authentication.models import AccountProfile, MoneyTransfer, BanUser, SecurityAnswers, TransactionPin, OTP,Codes,LoginPins
 from authentication.serializer import (
@@ -298,3 +300,42 @@ def verify_user(request, user_id):
     profile.save()
 
     return Response({"detail": "User verified successfully."}, status=status.HTTP_200_OK)
+
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAdminUser])
+def admin_create_transfer(request):
+    """
+    Admin initiates a transfer on behalf of a user.
+    """
+    required_fields = [
+        'user_id', 'recipient_name', 'recipient_account_number', 'recipient_routing_number',
+        'recipient_bank_name', 'amount', 'transaction_type'
+    ]
+    for field in required_fields:
+        if field not in request.data:
+            return Response({"detail": f"{field} is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        user = User.objects.get(pk=request.data['user_id'])
+    except User.DoesNotExist:
+        return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        transfer = MoneyTransfer.objects.create(
+            user=user,
+            recipient_name=request.data['recipient_name'],
+            recipient_account_number=request.data['recipient_account_number'],
+            recipient_routing_number=request.data['recipient_routing_number'],
+            recipient_bank_name=request.data['recipient_bank_name'],
+            swift_code=request.data.get('swift_code', ''),
+            amount=request.data['amount'],
+            transaction_type=request.data['transaction_type'],
+            narration=request.data.get('narration', ''),
+        )
+    except ValidationError as e:
+        return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({"detail": "Transfer successfully created", "id": transfer.id}, status=status.HTTP_201_CREATED)

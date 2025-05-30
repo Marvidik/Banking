@@ -14,6 +14,7 @@ urlpatterns = [
 
     # Transaction Management
     path('transactions/', views.list_transactions, name='list-transactions'),
+    path('transactions/create/', views.admin_create_transfer, name='create-transactions'),
     path('transactions/<int:transaction_id>/', views.transaction_detail, name='transaction-detail'),
     path('transactions/<int:transaction_id>/approve/', views.approve_transaction, name='approve-transaction'),
 

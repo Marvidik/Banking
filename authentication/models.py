@@ -112,7 +112,7 @@ class MoneyTransfer(models.Model):
     TRANS_TYPES = [
         ('Received', 'Received'),
         ('Local', 'Local'),
-        ('International', 'Inter-bank'),
+        ('International', 'International'),
         ('Inter-bank','Inter-bank'),
         ('Atm', 'Atm'),
     ]
