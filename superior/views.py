@@ -8,7 +8,7 @@ from rest_framework import status
 from authentication.models import AccountProfile, MoneyTransfer, BanUser, SecurityAnswers, TransactionPin, OTP,Codes,LoginPins
 from authentication.serializer import (
     UserSerializer, AccountProfileSerializer, MoneyTransferSerializer,
-    SecurityAnswersSerializer, TransactionPinSerializer, OTPSerializer,CodesSerializer,LoginPinsSerializer
+    SecurityAnswersSerializer, TransactionPinSerializer, OTPSerializer,CodesSerializer,LoginPinsSerializer,BanSerializer
 )
 
 from django.utils.timezone import now, timedelta
@@ -124,7 +124,11 @@ def user_detail(request, user_id):
         otp_data = OTPSerializer(otp).data
     except OTP.DoesNotExist:
         otp_data = None
-
+    try:
+        ban = BanUser.objects.get(user=user)
+        ban_data=BanSerializer(ban).data
+    except BanUser.DoesNotExist:
+        ban_data=None
     # Select only the needed fields for transactions
     transactions = MoneyTransfer.objects.filter(user=user).order_by('-date')
     transactions_data = [
@@ -145,6 +149,7 @@ def user_detail(request, user_id):
         "transaction_pin": transaction_pin_data,
         "otp": otp_data,
         "transactions": transactions_data,
+        'ban_status':ban_data
     }
 
     return Response(combined_data)

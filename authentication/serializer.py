@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from .models import AccountProfile,MoneyTransfer,LoginPins,SecurityAnswers,TransactionPin,Codes,OTP
-from .models import Codes, LoginPins
+from .models import Codes, LoginPins,BanUser
 
 class CodesSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,6 +15,11 @@ class LoginPinsSerializer(serializers.ModelSerializer):
         model = LoginPins
         fields = '__all__'
 
+
+class BanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=BanUser
+        fields = '__all__'
 
 #  user serializer
 class UserSerializer(serializers.ModelSerializer):
