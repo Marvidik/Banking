@@ -209,7 +209,7 @@ def transaction_detail(request, transaction_id):
 @permission_classes([IsAdminUser])
 def approve_transaction(request, transaction_id):
     """
-    Approve a pending transaction.
+    Approve a pending transaction without triggering model save().
     """
     try:
         transaction = MoneyTransfer.objects.get(pk=transaction_id)
@@ -219,9 +219,8 @@ def approve_transaction(request, transaction_id):
     if transaction.status_type == 'APPROVED':
         return Response({"detail": "Transaction already approved"}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Business logic for approval could go here.
-    transaction.status_type = 'APPROVED'
-    transaction.save()
+    # Use update to avoid save() logic
+    MoneyTransfer.objects.filter(pk=transaction_id).update(status_type='APPROVED')
 
     return Response({"detail": f"Transaction {transaction_id} approved."})
 
