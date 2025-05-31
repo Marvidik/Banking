@@ -85,7 +85,7 @@ def list_users(request):
             'id':user.id,
             "username": user.username,
             "account_type": account_type,
-            "status": "Banned" if not verified else "Active",
+            "status": "Unverified" if not verified else "Active",
             "balance": f"${balance:,.2f}",
             "join_date": user.date_joined.strftime("%Y-%m-%d"),
             'email':email
