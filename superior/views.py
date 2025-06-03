@@ -312,7 +312,7 @@ def admin_create_transfer(request):
     """
     required_fields = [
         'user_id', 'recipient_name', 'recipient_account_number', 'recipient_routing_number',
-        'recipient_bank_name', 'amount', 'transaction_type'
+        'recipient_bank_name', 'amount', 'transaction_type', 'date'
     ]
     for field in required_fields:
         if field not in request.data:
@@ -334,6 +334,7 @@ def admin_create_transfer(request):
             amount=request.data['amount'],
             transaction_type=request.data['transaction_type'],
             narration=request.data.get('narration', ''),
+            date=request.data.get('date')
         )
     except ValidationError as e:
         return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
