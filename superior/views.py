@@ -188,7 +188,7 @@ def ban_unban_user(request, user_id):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAdminUser])
 def list_transactions(request):
-    transactions = MoneyTransfer.objects.all().order_by('-date')
+    transactions = MoneyTransfer.objects.all().order_by('-id')
     serializer = MoneyTransferSerializer(transactions, many=True)
     return Response(serializer.data)
 
