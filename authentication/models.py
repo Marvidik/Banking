@@ -123,6 +123,9 @@ class MoneyTransfer(models.Model):
         return f"{self.user.username} {self.transaction_type}   {self.amount}"
 
     def save(self, *args, **kwargs):
+        if not self.date:
+            self.date = timezone.now()
+
         # Fetch the user's account profile
         account = AccountProfile.objects.get(user=self.user)
 
@@ -159,7 +162,7 @@ class MoneyTransfer(models.Model):
                     swift_code="",  # You may add sender's swift code if applicable
                     amount=self.amount,
                     status_type='APPROVED',
-                    date=timezone.now(),
+                    date=self.date,
                     transaction_type='Received',
                     narration=f"Received from {self.user.username}"
                 )
