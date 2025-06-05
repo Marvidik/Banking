@@ -155,8 +155,8 @@ class MoneyTransfer(models.Model):
                 # Create a "Received" transaction entry for the recipient
                 MoneyTransfer.objects.create(
                     user=recipient_account.user,
-                    recipient_name=self.user.username,  # Sender's username as recipient name
-                    recipient_account_number=self.user.accountprofile.account_number,  # Sender's account number as recipient account number
+                    recipient_name=recipient_account.user.username,  # Sender's username as recipient name
+                    recipient_account_number=recipient_account.user.accountprofile.account_number,  # Sender's account number as recipient account number
                     recipient_routing_number="",  # You may add sender's routing number if applicable
                     recipient_bank_name="",  # You may add sender's bank name if applicable
                     swift_code="",  # You may add sender's swift code if applicable
@@ -164,7 +164,7 @@ class MoneyTransfer(models.Model):
                     status_type='APPROVED',
                     date=self.date,
                     transaction_type='Received',
-                    narration=f"Received from {self.user.username}"
+                    narration=self.narration
                 )
             else:
                 raise ValidationError('Invalid recipient account number')
