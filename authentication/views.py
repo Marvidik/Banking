@@ -230,18 +230,24 @@ def transfer_mail(email, Type, amount, name, surname, desp, datet, balance):
 # The login API 
 @api_view(['POST'])
 def login(request):
-    #Getting the user from the request data
-    user=get_object_or_404(User,username=request.data['username'])
-    #Checking if the users password matches 
-    if not user.check_password(request.data['password']):
-        return Response({"details":"Wrong Password"},status=status.HTTP_401_UNAUTHORIZED)
+    # Getting the user from the request data
+    user = get_object_or_404(User, username=request.data['username'])
     
-    # Getting the users token or generating one if it dosnt exist
-    token,created=Token.objects.get_or_create(user=user)
-    serializer=UserSerializer(instance=user)
-    #Returning the users data and the users token.
- 
-    return Response({"token":token.key,"user":serializer.data})
+    # Checking if the account is inactive (banned)
+    if not user.is_active:
+        return Response({"details": "Account banned"}, status=status.HTTP_403_FORBIDDEN)
+    
+    # Checking if the user's password matches 
+    if not user.check_password(request.data['password']):
+        return Response({"details": "Wrong Password"}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    # Getting the user's token or generating one if it doesn't exist
+    token, created = Token.objects.get_or_create(user=user)
+    serializer = UserSerializer(instance=user)
+    
+    # Returning the user's data and the user's token
+    return Response({"token": token.key, "user": serializer.data})
+
 
 @api_view(['POST'])
 def confirm_pin(request):
