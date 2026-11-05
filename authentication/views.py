@@ -284,8 +284,16 @@ def register(request):
 def get_profile(request,id):
     profile = AccountProfile.objects.filter(user=id)
     serializer = AccountProfileSerializer(profile, many=True)
+    ban_statuses = dict(
+        BanUser.objects.filter(user_id__in=profile.values_list('user_id', flat=True))
+        .values_list('user_id', 'ban')
+    )
+    profile_data = [
+        {**profile_item, 'ban': ban_statuses.get(profile_item['user'], False)}
+        for profile_item in serializer.data
+    ]
 
-    return Response({'profile': serializer.data}, status=status.HTTP_200_OK)
+    return Response({'profile': profile_data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @parser_classes([MultiPartParser, FormParser])
