@@ -328,7 +328,7 @@ def make_transaction(request, id):
     try:
         ban_status = BanUser.objects.get(user=user)
         if ban_status.ban:
-            return Response({'error': 'You are banned from making transactions'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'This account is currently restricted Please contact Customer support via email or Livechat for assitance'}, status=status.HTTP_403_FORBIDDEN)
     except BanUser.DoesNotExist:
         # If the BanUser record does not exist, assume the user is not banned
         pass
